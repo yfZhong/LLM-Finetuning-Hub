@@ -1,0 +1,2 @@
+Section header:ALLERGY
+Section text:The patient has asthma, sinus, hives, and history of psoriasis.  No known drug allergies.

@@ -1,0 +1,2 @@
+Section header:GENHX
+Section text:The patient is a 45-year-old male complaining of abdominal pain.  The patient also has a long-standing history of diabetes which is treated with Micronase daily.

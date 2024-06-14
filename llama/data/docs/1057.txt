@@ -1,0 +1,2 @@
+Section header:PASTSURGICAL
+Section text:No major surgery except for prior cardiac catheterization.

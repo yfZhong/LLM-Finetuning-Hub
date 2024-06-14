@@ -1,0 +1,2 @@
+Section header:ALLERGY
+Section text:The patient has eczema and a positive atopic family history.  No psoriasis.  No known drug allergies.

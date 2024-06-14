@@ -1,0 +1,2 @@
+Section header:GENHX
+Section text:The patient states she is feeling a bit better.

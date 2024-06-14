@@ -1,0 +1,2 @@
+Section header:EDCOURSE
+Section text:PROGNOSIS: Improved.

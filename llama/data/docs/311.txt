@@ -1,0 +1,2 @@
+Section header:DISPOSITION
+Section text:Follow up with Dr. X in ABC Office in 1 to 2 weeks.

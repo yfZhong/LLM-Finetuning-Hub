@@ -1,0 +1,2 @@
+Section header:PASTMEDICALHX
+Section text:He has had diabetes since 2003.  He also has asthma, hypertension, and hypercholesterolemia.

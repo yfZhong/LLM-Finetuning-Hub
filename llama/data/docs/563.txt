@@ -1,0 +1,2 @@
+Section header:ROS
+Section text:The patient states that he did use heroin as well as cocaine earlier today and feels under the influence.  Denies any headache or visual complaints.  No hallucinations.  No chest pain, shortness of breath, abdominal pain or back pain.  Denies any abscesses.

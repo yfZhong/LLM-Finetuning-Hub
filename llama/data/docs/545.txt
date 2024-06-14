@@ -1,0 +1,2 @@
+Section header:ROS
+Section text:IMMUNOLOGIC: Negative; Negative for steroids, chemotherapy, or cancer.

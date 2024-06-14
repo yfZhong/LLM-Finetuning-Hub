@@ -1,0 +1,2 @@
+Section header:PASTMEDICALHX
+Section text:Past medical history is significant for allergies and thyroid problems.

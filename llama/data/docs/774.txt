@@ -1,0 +1,2 @@
+Section header:IMAGING
+Section text:The patient's CBC results from before were reviewed.  Her CBC performed in the office today showed hemoglobin of 13.7, white count of 13.3, lymphocyte count of 7.6, and platelet count of 26,000.

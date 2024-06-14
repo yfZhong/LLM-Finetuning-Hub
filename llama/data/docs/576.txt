@@ -1,0 +1,2 @@
+Section header:IMAGING
+Section text:Chest x-ray revealed a diffuse pulmonary edema.

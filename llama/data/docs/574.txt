@@ -1,0 +1,2 @@
+Section header:PASTMEDICALHX
+Section text:Denies diabetes, cardiovascular disease, or pulmonary disease.

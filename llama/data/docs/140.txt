@@ -1,0 +1,2 @@
+Section header:GENHX
+Section text:The patient is a 61-year-old female who was treated with CyberKnife therapy to a right upper lobe stage IA non-small cell lung cancer.  CyberKnife treatment was completed one month ago.  She is now being seen for her first post-CyberKnife treatment visit. Since undergoing CyberKnife treatment, she has had low-level nausea without vomiting.  She continues to have pain with deep inspiration and resolving dysphagia.  She has no heartburn, cough, hemoptysis, rash, or palpable rib pain.

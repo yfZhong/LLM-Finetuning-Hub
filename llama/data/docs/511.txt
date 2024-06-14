@@ -1,0 +1,2 @@
+Section header:PASTMEDICALHX
+Section text:The patient has no significant past medical history with the exception of previous hand fracture and tibia fracture.

@@ -1,0 +1,2 @@
+Section header:CC
+Section text:The patient is here for two-month followup.

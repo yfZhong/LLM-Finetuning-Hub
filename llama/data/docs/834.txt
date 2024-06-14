@@ -1,0 +1,2 @@
+Section header:PASTMEDICALHX
+Section text:The patient denies any previous past medical history.  He currently does not have a primary care physician as he is uninsured.

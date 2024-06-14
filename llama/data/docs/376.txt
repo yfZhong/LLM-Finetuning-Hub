@@ -1,0 +1,2 @@
+Section header:GENHX
+Section text:The patient is a 78-year-old female who returns for recheck.  She has hypertension.  She denies difficulty with chest pain, palpations, orthopnea, nocturnal dyspnea, or edema.

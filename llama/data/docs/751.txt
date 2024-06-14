@@ -1,0 +1,2 @@
+Section header:ROS
+Section text:The patient has been eating fairly well, sleeping well, doing well with her sprints.  A little difficulty with her stools hard versus soft as mentioned with the diet situation up in HPI.

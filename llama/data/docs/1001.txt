@@ -1,0 +1,2 @@
+Section header:GENHX
+Section text:The patient rates the pain at 2/10 on the pain analog scale.  The patient states that with elevation and rest, her pain subsides.

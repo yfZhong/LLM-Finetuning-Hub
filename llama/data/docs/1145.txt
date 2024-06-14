@@ -1,0 +1,2 @@
+Section header:PASTMEDICALHX
+Section text:The patient has a history of multiple medical problems including hypothyroidism, hypertension, and gallbladder difficulties.

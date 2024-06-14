@@ -1,0 +1,2 @@
+Section header:PASTSURGICAL
+Section text:The patient is single.  Living at home.  No smoking or alcohol.

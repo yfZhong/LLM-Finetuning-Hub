@@ -1,0 +1,2 @@
+Section header:MEDICATIONS
+Section text:Claritin for allergic rhinitis.

@@ -1,0 +1,2 @@
+Section header:ROS
+Section text:RESPIRATORY: No shortness of breath, wheezing, dyspnea, pulmonary disease, tuberculosis or past pneumonias.

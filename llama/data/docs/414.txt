@@ -1,0 +1,2 @@
+Section header:ROS
+Section text:The patient complains of feeling weak and fatigued. He has no appetite over the past week and has lost 8 pounds during this period. No chest pain, palpitations, shortness of breath or coughing. He denies any nausea, vomiting, or abdominal pain. No focal neuro deficits. Otherwise, as stated in HPI.

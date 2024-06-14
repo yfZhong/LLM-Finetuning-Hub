@@ -1,0 +1,2 @@
+Section header:ROS
+Section text:Denies any seizure disorder, chest pain, denies any shortness of breath, denies any dysuria, burning or pain, denies any nausea or vomiting at this time.  The patient does have a history of nausea and vomiting, but is doing better.

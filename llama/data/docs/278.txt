@@ -1,0 +1,2 @@
+Section header:GENHX
+Section text:The patient eats regular diet and eats 3 meals a day.

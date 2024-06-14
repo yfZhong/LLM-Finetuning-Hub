@@ -1,0 +1,2 @@
+Section header:ROS
+Section text:LYMPH: No history of systemic allergy, abnormal lymph nodes or swelling.

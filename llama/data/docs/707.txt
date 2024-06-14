@@ -1,0 +1,2 @@
+Section header:ROS
+Section text:The patient has multiple medical problems, for which she is under the care of Dr. X.  She has a history of chronic obstructive lung disease and a history of gastroesophageal reflux disease.  There is a history of anemia and there is a history of sciatica, which has been caused by arthritis.  The patient has had skin cancers, which have been treated with local excision.

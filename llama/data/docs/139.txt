@@ -1,0 +1,2 @@
+Section header:ROS
+Section text:CARDIOVASCULAR: No history of palpitations, irregular rhythm, chest pain, hypertension, hyperlipidemia, diaphoresis, congestive heart failure, heart catheterization, stress test or recent cardiac tests.

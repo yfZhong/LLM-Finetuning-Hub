@@ -1,0 +1,2 @@
+Section header:PASTMEDICALHX
+Section text:The patient has been diabetic for 35 years, has been insulin-dependent for the last 20 years.  He also has a history of prostate cancer, which was treated by radiation.  He says his PSA is at 0.01.
