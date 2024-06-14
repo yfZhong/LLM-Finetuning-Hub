@@ -135,7 +135,7 @@ def main(args):
 
     # BitsAndBytesConfig int-4 config
     bnb_config = BitsAndBytesConfig(
-        load_in_4bit=True,
+        load_in_4bit=False,
         bnb_4bit_use_double_quant=True,
         bnb_4bit_quant_type="nf4",
         bnb_4bit_compute_dtype=torch.bfloat16,
@@ -217,8 +217,6 @@ def main(args):
     train_loss = trainer_stats.training_loss
     print(f"Training loss:{train_loss}")
 
-    # for obj in SFTTrainer.log_history:
-    #     logging.info(str(obj))
 
     peft_model_id = f"{results_dir}/assets"
     trainer.model.save_pretrained(peft_model_id)
