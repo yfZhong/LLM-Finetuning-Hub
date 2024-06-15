@@ -25,9 +25,7 @@ from sent_similarity import Sent_Similar
 from langchain_community.embeddings import HuggingFaceEmbeddings
 from document_retrieval import rank_based_docs
 
-
-# Set your API key
-openai.api_key ="Your open apt key"
+openai_api_key = ""
 
 qg_model = None
 qg_tokenizer = None
@@ -137,7 +135,7 @@ def generate_step_with_gpt_model(messages, max_new_tokens=1024, temperature=1.0)
                 # 'https://api.gptapi.us/v1/chat/completions',
                 headers={
                     'Content-Type': 'application/json',
-                    'Authorization': f'Bearer {openai.api_key}'
+                    'Authorization': f'Bearer {openai_api_key}'
                     # 'Authorization': f'Bearer {my_api_key}'
                 },
                 json={
@@ -236,6 +234,35 @@ def pred_generate_step_with_llama2(messages, max_new_tokens=1024, temperature=0.
     return response
 
 
+
+def generate_metrics(val_instructions, summaries, result_json_file):
+    results=[]
+    if os.path.exists(result_json_file):
+        with open(result_json_file) as jf:
+            result_json = json.load(jf)
+        for item in result_json:
+            results.append(item['predict'])
+    metrics = calculate_metrics(summaries[:args.test_sample_num], results)
+    print(metrics)
+
+    gpt_evaluation = False
+    if gpt_evaluation:
+        print("Start Gpt evaluation")
+        R, T, A, Rs = GPT_Evaluation(val_instructions[:args.test_sample_num], results[:args.test_sample_num])
+        # R, T, A, Rs= GPT_Evaluation(val_instructions[:2], results[:2])
+        print("readability_score: {}\ntruthfulness_score: {}\nOverall Score: {}\n".format(statistics.mean(R),
+                                                                                          statistics.mean(T),
+                                                                                          statistics.mean(A)))
+        save_info = "readability_score: {}\ntruthfulness_score: {}\nOverall Score: {}\n".format(statistics.mean(R),
+                                                                                                statistics.mean(T),
+                                                                                                statistics.mean(A))
+        for i in range(len(Rs)):
+            save_info += "{}\t{}\t{}\n".format(R[i], T[i], A[i])
+        for i in range(len(Rs)):
+            save_info += "{}-------------\n{}\n\n".format(i, Rs[i])
+        with open(result_json_file.replace(".json", "-GPT-eval.txt"), "wb") as f:
+            f.write(save_info.encode())
+
 def main(args):
     global pred_model, pred_tokenizer, qg_model, qg_tokenizer
     if args.dataset == "MTS_Dialogue":
@@ -263,29 +290,8 @@ def main(args):
 
     results = []
     if (args.load_results):
-        json_file = os.path.join(save_dir, save_file_name[:-4] + "_result.json")
-        if os.path.exists(json_file):
-            with open(json_file) as jf:
-                result_json = json.load(jf)
-            for item in result_json:
-                results.append(item['predict'])
-        metrics = calculate_metrics(summaries[:args.test_sample_num], results)
-        print(metrics)
-
-        gpt_evaluation = False
-        if gpt_evaluation:
-            print("Start Gpt evaluation")
-            R, T, A , Rs = GPT_Evaluation(val_instructions[:args.test_sample_num], results[:args.test_sample_num])
-            # R, T, A, Rs= GPT_Evaluation(val_instructions[:2], results[:2])
-            print("readability_score: {}\ntruthfulness_score: {}\nOverall Score: {}\n".format(statistics.mean(R), statistics.mean(T), statistics.mean(A)))
-            save_info = "readability_score: {}\ntruthfulness_score: {}\nOverall Score: {}\n".format(statistics.mean(R), statistics.mean(T), statistics.mean(A))
-            for i in range(len(Rs)):
-                save_info += "{}\t{}\t{}\n".format(R[i], T[i], A[i])
-            for i in range(len(Rs)):
-                save_info +="{}-------------\n{}\n\n".format(i, Rs[i])
-            with open(os.path.join(save_dir, save_file_name.replace(".txt", "-GPT-eval.txt")), "wb") as f:
-                f.write(save_info.encode())
-
+        result_json_file = os.path.join(save_dir, save_file_name[:-4] + "_result.json")
+        generate_metrics(val_instructions, summaries, result_json_file)
         # GPT_fact_checking(val_instructions[:args.test_sample_num], results)
         exit()
 
@@ -616,6 +622,8 @@ if __name__ == "__main__":
 
     parser.add_argument("--dataset", type=str,
                         default="MTS_Dialogue") #aci-bench
+    parser.add_argument("--openai_api_key", type=str,
+                        default="Your_openai_api_key")
     parser.add_argument("--temperature", type=float, default=0.01)
     parser.add_argument("--repetition_penalty", type=float, default=1.0)
     parser.add_argument("--max_new_tokens", type=int, default=256)
