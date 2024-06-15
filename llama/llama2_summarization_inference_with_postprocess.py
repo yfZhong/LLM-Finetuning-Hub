@@ -12,7 +12,7 @@ from llama_patch import unplace_flash_attn_with_attn
 from peft import AutoPeftModelForCausalLM
 from transformers import AutoModelForCausalLM
 
-from prompts import INFERENCE_SUMMARIZATION_PROMPT, INFERENCE_SUMMARIZATION_PROMPT_v2, INFERENCE_SUMMARIZATION_PROMPT_v3
+from prompts import INFERENCE_SUMMARIZATION_PROMPT, INFERENCE_SUMMARIZATION_PROMPT_v2, INFERENCE_SUMMARIZATION_PROMPT_v3, INFERENCE_SUMMARIZATION_PROMPT_v4
 import numpy as np
 
 from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
@@ -24,8 +24,6 @@ import statistics
 from sent_similarity import Sent_Similar
 from langchain_community.embeddings import HuggingFaceEmbeddings
 from document_retrieval import rank_based_docs
-
-openai_api_key = ""
 
 qg_model = None
 qg_tokenizer = None
@@ -56,14 +54,14 @@ def prepare_mts_instructions(dialogues, section_texts):
     instructions = []
     summaries = []
     # prompt = INFERENCE_SUMMARIZATION_PROMPT
-    prompt = INFERENCE_SUMMARIZATION_PROMPT_v2
+    prompt = INFERENCE_SUMMARIZATION_PROMPT_v4
     for dialogue, section_text in zip(dialogues, section_texts):
         example = prompt.format(
             dialogue=dialogue,
             # summary=section_text
         )
         instructions.append(example)
-        summaries.append( section_text)
+        summaries.append(section_text)
     return instructions, summaries
 
 # def prepare_mts_instructions(dialogues, section_headers, section_texts):
@@ -123,7 +121,7 @@ def prepare_acibench_data(args):
     return validation_instructions, summaries
 
 
-def generate_step_with_gpt_model(messages, max_new_tokens=1024, temperature=1.0):
+def generate_step_with_gpt_model(messages, max_new_tokens=1024, temperature=1.0, model_version="GPT-4o", openai_api_key=""):
     cycle_i = 1
     MAXCYCLE = 50
     while cycle_i < MAXCYCLE:
@@ -139,9 +137,7 @@ def generate_step_with_gpt_model(messages, max_new_tokens=1024, temperature=1.0)
                     # 'Authorization': f'Bearer {my_api_key}'
                 },
                 json={
-                    # 'model': 'gpt-3.5-turbo',
-                    # 'model': 'gpt-3.5-turbo-0125',
-                    'model': 'gpt-4',
+                    'model': model_version,
                     'messages': messages,
                     'logprobs': True,
                     'temperature': temperature,
@@ -199,40 +195,34 @@ def question_generate_step_with_llama3(messages, max_new_tokens=1024, temperatur
 
     return response
 
-def pred_generate_step_with_llama2(messages, max_new_tokens=1024, temperature=0.01, repetition_penalty=1.0):
+def pred_generate_step_with_llama3(messages, max_new_tokens=1024, temperature=0.01, repetition_penalty=1.0):
 
-    input_ids = pred_tokenizer.apply_chat_template(
+    text = pred_tokenizer.apply_chat_template(
         messages,
-        add_generation_prompt=True,
-        return_tensors="pt"
-    ).to(pred_model.device)
+        tokenize=False,
+        add_generation_prompt=True)
 
-    # input_ids = pred_tokenizer(
-    #     messages, return_tensors="pt", truncation=True
-    # ).input_ids.to(pred_model.device)
+    input_ids = pred_tokenizer([text], return_tensors="pt").to(pred_model.device).input_ids
 
-    terminators = [
-        pred_tokenizer.eos_token_id,
-        pred_tokenizer.convert_tokens_to_ids("<|eot_id|>")
-    ]
-
-    outputs = pred_model.generate(
+    generated_ids = pred_model.generate(
         input_ids,
         max_new_tokens=max_new_tokens,
-        eos_token_id=terminators,
+        eos_token_id=pred_tokenizer.encode('<|eot_id|>')[0],
         do_sample=True,
-        top_k=50,
+        # top_k=50,
         top_p=0.9,
         temperature=temperature,
         pad_token_id=pred_tokenizer.eos_token_id,
         repetition_penalty=repetition_penalty,
-        # repetition_penalty=1.0,
     )
+    generated_ids = [
+        output_ids[len(input_ids):] for input_ids, output_ids in zip(input_ids, generated_ids)
+    ]
 
-    response = pred_tokenizer.decode(outputs[0][input_ids.shape[-1]:], skip_special_tokens=True)
+    response = pred_tokenizer.batch_decode(generated_ids, skip_special_tokens=True)[0]
+    # response = pred_tokenizer.decode(outputs[0][input_ids.shape[-1]:], skip_special_tokens=True)
 
     return response
-
 
 
 def generate_metrics(val_instructions, summaries, result_json_file):
@@ -265,6 +255,7 @@ def generate_metrics(val_instructions, summaries, result_json_file):
 
 def main(args):
     global pred_model, pred_tokenizer, qg_model, qg_tokenizer
+
     if args.dataset == "MTS_Dialogue":
         val_instructions, summaries = prepare_mtsdialog_data(args)
     elif args.dataset == "aci-bench":
@@ -276,17 +267,10 @@ def main(args):
     save_dir = os.path.join(experiment, "metrics")
     if not os.path.exists(save_dir):
         os.makedirs(save_dir)
-    if args.filtered_by_query:
-        fbq = 1
-    else:
-        fbq = 0
-    if args.sample_rerank:
-        sr = 1
-    else:
-        sr = 0
+
     save_file_name = "testchat_test{}_temp{}_sr{}_candidates{}_gen_query{}_filter_query{}_fbq{}_rp{}_mid-{}_mnt-{}.txt".format(
-        args.test_sample_num, args.temperature, sr, args.num_candidates, args.num_generated_query,
-        args.num_selected_query, fbq, args.repetition_penalty, args.embed_model_id[:5], args.max_new_tokens)
+        args.test_sample_num, args.temperature, int(args.sample_rerank), args.num_candidates, args.num_generated_query,
+        args.num_selected_query, int(args.filtered_by_query), args.repetition_penalty, args.embed_model_id[:5], args.max_new_tokens)
 
     results = []
     if (args.load_results):
@@ -344,24 +328,22 @@ def main(args):
 
         input_messages = [{"role": "user",
                      "content": '{}'.format(instruct)}]
+
         if args.dataset == "aci-bench":
             input_messages.append({"role": "system",
                              "content": """You are a helpful assistant who summarizes the given input dialogue into a 
                              medical report having the following sections : "HISTORY OF PRESENT ILLNESS", 
                              "PHYSICAL EXAM", "RESULTS", "ASSESSMENT AND PLAN". """})
 
-        # input_ids = pred_tokenizer(
-        #     instruct, return_tensors="pt", truncation=True
-        # ).input_ids.cuda()
         with torch.inference_mode():
             num_candidates = args.num_candidates
 
             if args.sample_rerank and num_candidates > 1:
                 sample_results = []
+                # generate multiple candidates
                 for j in range(num_candidates):
-
-                    result = pred_generate_step_with_llama2(input_messages, max_new_tokens=args.max_new_tokens, temperature=args.temperature, repetition_penalty=args.repetition_penalty)
-
+                    result = pred_generate_step_with_llama3(input_messages, max_new_tokens=args.max_new_tokens, temperature=args.temperature, repetition_penalty=args.repetition_penalty)
+                    # result = generate_step_with_gpt_model(input_messages, max_new_tokens=args.max_new_tokens, temperature=args.temperature, model_version=args.gpt_model_version, openai_api_key=args.openai_api_key)
                     if result not in sample_results:
                         sample_results.append(result)
 
@@ -369,11 +351,10 @@ def main(args):
 
                 if len(sample_results) > 1:
                     # QAG
-                    # dialogue = instruct.split('```')[1]
                     prompt = "Generate {} question-answer pairs based on the following dialogue. " \
                              "The answers should come from the dialogue or can be infer from the dialogue. " \
                              "Follow the structure of the following question-answer pair: #Question_ID. Question: Where is the infection located in the patient's body?\nAnswer: The infection is in both lungs of the patient's body. " \
-                             "The dialogue is as follows: {}".format(args.num_generated_query, instruct[:-13])
+                             "The dialogue is as follows: {}".format(args.num_generated_query, instruct.split("### Dialogue:")[1])
 
                     messages = [{"role": "user",
                                  "content": '{}'.format(prompt)}]
@@ -412,7 +393,7 @@ def main(args):
                         # dialogue = instruct.split('```')[1]
                         messages0 = [{"role": "user",
                                       "content": 'Refer to the Knowledge: {} and answer the question {}， don\'t make up any knowledge out of the given knowledge'.format(
-                                          instruct[:-13], q)}]
+                                          instruct.split("### Dialogue:")[1], q)}]
                         answer_0 = question_generate_step_with_llama3(messages0)
                         answer_list = []
                         for sample_sum in sample_results:
@@ -442,13 +423,14 @@ def main(args):
                     result = sample_results[0]
                     save_info += "Only one result:*****************\n{}\n".format(result)
             else:
-                result = pred_generate_step_with_llama2(input_messages, max_new_tokens=args.max_new_tokens, temperature=args.temperature, repetition_penalty=args.repetition_penalty)
+                result = pred_generate_step_with_llama3(input_messages, max_new_tokens=args.max_new_tokens, temperature=args.temperature, repetition_penalty=args.repetition_penalty)
+                # result = generate_step_with_gpt_model(input_messages, max_new_tokens=args.max_new_tokens, temperature=args.temperature, model_version=args.gpt_model_version, openai_api_key=args.openai_api_key)
 
                 save_info += "Result:*********************\n{}\n".format(result)
 
-                with open(os.path.join(save_dir, save_file_name), "a") as f:
-                    f.write(save_info)
-                    save_info = ""
+            with open(os.path.join(save_dir, save_file_name), "a") as f:
+                f.write(save_info)
+                save_info = ""
 
             results.append(result)
             i += 1
@@ -620,10 +602,9 @@ if __name__ == "__main__":
     parser.add_argument("--test_file",
                         default="/home/data2/yongfeng/code3/MTS-Dialog/Main-Dataset/MTS-Dialog-TestSet-2-MEDIQA-Sum-2023.csv")
 
-    parser.add_argument("--dataset", type=str,
-                        default="MTS_Dialogue") #aci-bench
-    parser.add_argument("--openai_api_key", type=str,
-                        default="Your_openai_api_key")
+    parser.add_argument("--dataset", type=str, default="MTS_Dialogue") #aci-bench
+    parser.add_argument("--openai_api_key", type=str, default="Your_openai_api_key")
+    parser.add_argument("--gpt_model_version", type=str, default="GPT-4o")
     parser.add_argument("--temperature", type=float, default=0.01)
     parser.add_argument("--repetition_penalty", type=float, default=1.0)
     parser.add_argument("--max_new_tokens", type=int, default=256)
